@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 This script will run optimization and frequency calculations for a series
-of compounds (in SMILES strings). Based on the Reaction class from autodE.
+of compounds (SMILES strings). The results are to be used for redox potential
+calculations.
 
-It requires autodE (conda env 'autode').
-    
-Author: Dr. Freddy Bernal
+Based on the `Reaction` class from autodE.
+
+@author: Dr. Freddy Bernal
 """
 
 
@@ -21,15 +21,12 @@ from autode_module import Redox
 
 
 # Define parser
-def arg_parser():
-    """
-    Parses command-line arguments and returns parsed arguments.
+def arg_parser() -> argparse.Namespace:
+    """Parses command-line arguments and returns parsed arguments.
 
-    Returns
-    -------
-    Parsed arguments.
-
-    """
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """    
     
     script_usage = """python {} smiles -j jobname 
     -basis basis_set -func functional -solv solvent -ncores ncores 
@@ -75,21 +72,15 @@ def arg_parser():
 
 
 
-def read_file(filename):
-    """
-    Read contents of the specified file.
+def read_file(filename: str) -> list:
+    """Reads text file as a list of rows.
 
-    Parameters
-    ----------
-    filename : str
-        Name of the file to be read.
+    Args:
+        filename (str): path to file.
 
-    Returns
-    -------
-    lines_out : list of str
-        Contents of the file split by line.
-
-    """
+    Returns:
+        list: content of file split by line.
+    """    
 
     infile = open(filename, 'r')
     lines = infile.readlines()
@@ -102,11 +93,21 @@ def read_file(filename):
     return lines_out
 
 
-# Create helper function to run the simulations for each compound
-# from pandas row
-def calculate(smiles, name, solvent, temp=298.15): 
+# Helper function to run the simulations for each compound
+def calculate(filename: str, name: str, solvent: str, temp: float=298.15):
+    """Performs optimization and single point energy calculations for oxidized
+    and reduced forms of the given compound. It uses the `Redox` custom class.
+
+    Args:
+        filename (str): path to file containing SMILES strings for the 
+                        compounds (oxidized, neutral form).
+        name (str): jobname or ID.
+        solvent (str): solvent name (autodE valid).
+        temp (float, optional): temperature (Celsius). Defaults to 298.15.
+
+    """     
     # Define structures to submit for calculation
-    compounds = read_file(smiles)
+    compounds = read_file(filename)
 
     # Define calculation
     calc = Redox(compounds,
@@ -127,14 +128,14 @@ if __name__ == '__main__':
     
     # Customize autodE
     # Define number of cores to use
-    # 16 seem to be the max allowed for the available RAM
+    # 14 seem to be the max allowed for the available RAM
     ade.Config.n_cores = args.ncores 
     # Add diffuse functions because of anions
     # (ma-def2-SVP is recommendation from autodE troubleshooting)
     ade.Config.ORCA.keywords.set_opt_basis_set(args.basis_set_opt)
     ade.Config.ORCA.keywords.sp.basis_set = args.basis_set_sp
-    # Modify input for sp to overcome SCF convergence problems for radical anions
-    # according to ORCA directions
+    # Modify input for sp to overcome SCF convergence problems for 
+    # radical anions according to ORCA directions
     ade.Config.ORCA.keywords.sp.append(
         "\n"
         "%scf\n"
