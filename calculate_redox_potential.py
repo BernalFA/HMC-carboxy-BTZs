@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 This script will run optimization and frequency calculations for a series
-of compounds (SMILES strings). The results are to be used for redox potential
+of compounds (SMILES strings). It automatically run the calculation for the 
+given structures (defined as the oxidized forms) and for the corresponding 
+radical anions (reduced forms). The results are to be used for redox potential
 calculations.
 
 Based on the `Reaction` class from autodE.
@@ -29,7 +31,7 @@ def arg_parser() -> argparse.Namespace:
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     
     parser.add_argument('smiles',
-                        help='file with list of SMILES with compound ID (.smi)')
+                        help='file listing compounds as SMILES and ID (.smi)')
     parser.add_argument('-obasis',
                         dest='basis_set_opt', 
                         default='ma-def2-SVP',
@@ -91,8 +93,8 @@ def calculate(filename: str, name: str, solvent: str, temp: float=298.15):
     and reduced forms of the given compound. It uses the `Redox` custom class.
 
     Args:
-        filename (str): path to file containing SMILES strings for the 
-                        compounds (oxidized, neutral form).
+        filename (str): path to SMI file containing SMILES strings and ID for 
+                        the compounds (oxidized, neutral form).
         name (str): jobname or ID.
         solvent (str): solvent name (autodE valid).
         temp (float, optional): temperature (Celsius). Defaults to 298.15.
