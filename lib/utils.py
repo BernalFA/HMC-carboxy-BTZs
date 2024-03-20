@@ -49,7 +49,10 @@ def combine_data(prop: pd.DataFrame, exp: pd.DataFrame) -> pd.DataFrame:
     return out 
 
 
-def format_compound_name(name):
+def format_compound_name(name: str) -> str:
+    """transform compound names by removing unnecessary suffixes 
+    (linked by hyphen).
+    """    
     name_list = name.split('-')
     if len(name_list) >= 2:
         newname = ''.join(x for x in name_list)
@@ -58,15 +61,28 @@ def format_compound_name(name):
     return newname
 
 
-def correlation_statistics(df, variables, reference):
+def correlation_statistics(df: pd.DataFrame, 
+                           variables: list[str], 
+                           reference: str) -> None:
+    """Calculate Pearson, Spearman, and Kendall correlations for the listed 
+    variables in a dataframe (against a reference variable). It first check
+    for normality
+
+    Args:
+        df (pd.DataFrame): dataframe.   
+        variables (list[str]): list of columns to compare with reference.
+        reference (str): reference column for calculation.
+    """    
     labels = ['Pearson correlation', 'Spearman correlation', 'Kendall correlation']
 
+    # Check normality
     print('Shapiro Test:')
     for var in variables + [reference]:
         shap = shapiro(df[var])
         print(f'  {var:20}: {shap.pvalue:.2}')
     print('\n')
 
+    # Calculate correlations (individually)
     for var in variables:
         pearson = pearsonr(df[reference], df[var])
         spearman = spearmanr(df[reference], df[var])
@@ -84,6 +100,19 @@ def correlation_statistics(df, variables, reference):
 ############################
 
 def delta(df: pd.DataFrame, units:str='Ha') -> np.array:
+    """Calculate reaction energy and activation energy after automatic autodE
+    reaction profile calculation.
+
+    Args:
+        df (pd.DataFrame): dataframe with energy values from autodE (energies.csv). 
+        units (str, optional): Energy units ('Ha', 'kcal mol-1'). Defaults to 'Ha'.
+
+    Returns:
+        np.array: array containing reaction energy and activation energy values. 
+                  The values follow the order dE, dEts, dG, dGts 
+                  (ts=Transition State).
+    """
+
     # Define free energy
     df['G'] = df[' E_sp'] + df[' G_cont']
     # Separate energy and free energy for reactants, products, and TS
@@ -124,7 +153,14 @@ def get_name(folder):
     return name
 
 
-def retrieve_reaction_profile():
+def retrieve_reaction_profile() -> pd.DataFrame:
+    """Search for results from autodE run in the current directory and compile
+    the information in a single dataframe.
+
+    Returns:
+        pd.DataFrame: reaction and activation energy values in kcal/mol for
+                      all the reaction calculations found.
+    """    
     ref_path = os.getcwd()
     # Define list of folders
     folders = [folder for folder in os.listdir(ref_path)]
@@ -159,6 +195,9 @@ def retrieve_reaction_profile():
 
 
 def reformat_species_col(col):
+    """Conveniently separate species/state information contained on 
+    given string.
+    """    
     parts = col.split('_')
     if len(parts) == 2:
         _, name = parts
@@ -173,6 +212,17 @@ def reformat_species_col(col):
 
 
 def calculate_redox_potential(filename: str) -> pd.DataFrame:
+    """Perform redox potential calculation for a series of results from 
+    calculate_redox_potential.py script.
+
+    Args:
+        filename (str): path to file with autodE energies (energies.csv)
+
+    Returns:
+        pd.DataFrame: Gibbs free energy (kcal/mol) and redox potential (V) 
+                      values for each compound.
+    """
+
     # Load file as DataFrame
     df = pd.read_csv(filename, skiprows=1)
     # Sort df by species name
