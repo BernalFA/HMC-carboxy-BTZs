@@ -22,6 +22,13 @@ BAR_FORMAT = '{l_bar}{bar:20}{r_bar}'
 
 
 class Redox:
+    """Help to automatically perform optimization and single point energy
+    calculations for neutral compounds (oxidized) and their corresponding 
+    reduced forms (radical anion), using autodE. Create a dedicated folder
+    to stored results, including conformers, optimization, single_points, 
+    thermo, and an overall output. 
+    """    
+
     def __init__(
             self, 
             smiles: list, 
@@ -29,7 +36,13 @@ class Redox:
             solvent_name: Optional[str] = None, 
             temp: float = 298.15
     ):
-        
+        """
+        Args:
+            smiles (list): SMILES strings for compounds to process.
+            name (str): jobname or ID.
+            solvent_name (Optional[str], optional): Solvent name (autodE valid). Defaults to None.
+            temp (float, optional): Temperature. Defaults to 298.15 °C.
+        """        
         self.name = name
         self.oxidized, self.reduced = [], []
         self.solvent = get_solvent(solvent_name, kind="implicit")
@@ -39,7 +52,8 @@ class Redox:
             self._init_from_smiles(smiles)
        
 
-    def run_calculation(self):
+    def run_calculation(self) -> None:
+        """Perform whole calculation as iterative process."""        
 
         @work_in(self.name)
         def calculate(redox):
@@ -59,13 +73,13 @@ class Redox:
         return None
     
 
-    def _init_from_smiles(self, smiles) -> None:
-        """
-        Initialise from a SMILES string 
-        -----------------------------------------------------------------------
-        Arguments:
-            list of smiles with names (str):
-        """
+    def _init_from_smiles(self, smiles: list) -> None:
+        """Initialize calculation from SMILES string
+
+        Args:
+            smiles (list): list of SMILES
+
+        """        
         # Add all the oxidized and reduced species
         for i, smi in enumerate(smiles):
             ox = Molecule(smiles=smi.split()[0])
@@ -76,6 +90,8 @@ class Redox:
 
 
     def find_lowest_energy_conformers(self) -> None:
+        """Perform conformational search for each compound at DFT level."""        
+        
         print("Conformational search started.")
         h_method = get_hmethod() if Config.hmethod_conformers else None
         for mol in tqdm.tqdm(self.oxidized, 
@@ -89,8 +105,8 @@ class Redox:
 
     @work_in("optimization")
     def optimise_structures(self) -> None:
-        """Perform a geometry optimisation on all the reactants and products
-        using the method"""
+        """Perform geometry optimization for every compound in oxidized 
+        and reduced form, using the indicated DFT method"""
 
         print("Optimizations started.")
         h_method = get_hmethod()
@@ -117,6 +133,16 @@ class Redox:
     
     @work_in("thermo")
     def calculate_thermochemical_cont(self, free_energy=True, enthalpy=True):
+        """Perform calculation of thermochemical contributions for each 
+        compound in both forms.
+
+        Args:
+            free_energy (bool, optional): if True, calculate free energy 
+                                          component. Defaults to True.
+            enthalpy (bool, optional): if True, calculate enthalpy. 
+                                       Defaults to True.
+
+        """        
         
         if not (free_energy or enthalpy):
             return None
@@ -132,6 +158,7 @@ class Redox:
 
 
     def _solvate(self) -> None:
+        """add solvent to each species (if provided)."""
 
         if self.solvent is not None:
             for mol in self.oxidized + self.reduced:
@@ -150,6 +177,10 @@ class Redox:
 
     @work_in("single_points")
     def calculate_single_points(self) -> None:
+        """Perform single point energy calculation for each compound
+        in both forms.
+        """
+
         print("Single point calculations started.")
         h_method = get_hmethod()
         for mol in tqdm.tqdm(self.oxidized + self.reduced, 
@@ -167,6 +198,10 @@ class Redox:
     
     @work_in("output")
     def print_output(self):
+        """Help storing XYZ files of each optimized structure. Create 
+        a CSV file with energies and another with imaginary frequency checks. 
+        """
+
         print("Printing results.")
         from autode.log.methods import methods
         
@@ -205,8 +240,6 @@ class Redox:
                 frequencies.append(mol.imaginary_frequencies)
             
         with open("imaginary_frequencies.csv", "w") as imfreq:
-            # for n, f in zip(names, frequencies):
-            #     imfreq.write(f"{n}: {f}")
                 imfreq.writelines([f"{n}: {freq}" for n, freq in zip(names, frequencies)])
     
         return None
