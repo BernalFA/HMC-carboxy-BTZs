@@ -15,9 +15,7 @@ import autode as ade
 import argparse
 import sys
 
-sys.path.append("/home/tga_user/Documents/Scripts/Reactivity_autodE/")
-
-from autode_module import Redox
+from lib.redox import Redox
 
 
 # Define parser
@@ -57,7 +55,7 @@ def arg_parser() -> argparse.Namespace:
     parser.add_argument('-temp',
                         dest='temp',
                         default=298.15,
-                        help='Temperature (default: 298.15 K)')
+                        help='Temperature (default: 298.15 °C)')
     parser.add_argument('-ncores',
                         dest='ncores', 
                         default=14,
