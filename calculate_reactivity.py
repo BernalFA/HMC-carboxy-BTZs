@@ -10,7 +10,6 @@ interest. A new folder is created to store the results for all the reactions.
 # Import essential
 import argparse
 import os
-import sys
 import threading
 
 import autode as ade
@@ -24,13 +23,8 @@ def arg_parser() -> argparse.Namespace:
     Returns:
         argparse.Namespace: Parsed arguments.
     """    
-    
-    script_usage = """python {} -i infile -j jobname 
-    -basis basis_set -func functional -solv solvent -ncores ncores 
-    """.format(sys.argv[0])
-    
-    parser = argparse.ArgumentParser(usage=script_usage, 
-                                     description=__doc__,
+        
+    parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     
     parser.add_argument('-i',

@@ -13,7 +13,6 @@ Based on the `Reaction` class from autodE.
 # Import essential
 import autode as ade
 import argparse
-import sys
 
 from lib.redox import Redox
 
@@ -26,12 +25,7 @@ def arg_parser() -> argparse.Namespace:
         argparse.Namespace: Parsed arguments.
     """    
     
-    script_usage = """python {} smiles -j jobname 
-    -basis basis_set -func functional -solv solvent -ncores ncores 
-    """.format(sys.argv[0])
-    
-    parser = argparse.ArgumentParser(usage=script_usage, 
-                                     description=__doc__,
+    parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     
     parser.add_argument('smiles',
