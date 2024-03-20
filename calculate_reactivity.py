@@ -1,39 +1,33 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 This script was created to run DFT calculations for a set of reactions of 
 interest. A new folder is created to store the results for all the reactions.
-
-It requires autodE (conda env 'autode').
     
-Author: Dr. Freddy Bernal
+@author: Dr. Freddy Bernal
 """
 
 
 # Import essential
+import argparse
+import os
+import sys
+import threading
+
 import autode as ade
 import pandas as pd
-# import numpy as np
-import threading
-import argparse
-import sys
-import os
 
 
 # Define parser
-def arg_parser():
-    """
-    Parses command-line arguments and returns parsed arguments.
+def arg_parser() -> argparse.Namespace:
+    """Parses command-line arguments and returns parsed arguments.
 
-    Returns
-    -------
-    Parsed arguments.
-
-    """
+    Returns:
+        argparse.Namespace: Parsed arguments.
+    """    
     
     script_usage = """python {} -i infile -j jobname 
     -basis basis_set -func functional -solv solvent -ncores ncores 
-    """.format(sys.argv[0][2:])
+    """.format(sys.argv[0])
     
     parser = argparse.ArgumentParser(usage=script_usage, 
                                      description=__doc__,
@@ -41,7 +35,8 @@ def arg_parser():
     
     parser.add_argument('-i',
                         dest='infile', 
-                        help='file with SMILES for reactants and products (TXT, CSV)')
+                        help='file with SMILES for reactants and products (TXT, CSV). \
+                            columns = ["name", "R1", "R2", "P1", "P2"]')
     parser.add_argument('-obasis',
                         dest='basis_set_opt', 
                         default='ma-def2-SVP',
@@ -72,9 +67,18 @@ def arg_parser():
 
 
 
-# Create helper function to run the simulations for each compound
-# from pandas row
-def run_simulation(row, solvent, jobname): 
+# Helper function to run individual simulations
+def run_simulation(row: pd.Series, solvent: str, jobname: str): 
+    """Perform reaction profile calculation for a single compound, using autodE.
+    Two reactants and two products allowed.
+
+    Args:
+        row (pd.Series): pandas dataframe row containing SMILES for reactants 
+        and products.
+        solvent (str): solvent name used for calculation (if any).
+        jobname (str): descriptive jobname.
+
+    """    
     # Define reactants and products
     reac1 = ade.Reactant(name='R1',
                          smiles=row['R1'])
@@ -83,6 +87,7 @@ def run_simulation(row, solvent, jobname):
                              smiles=row['R2'])
     else:
         reac2 = None
+
     prod1 = ade.Product(name='P1',
                         smiles=row['P1'])
     if not pd.isnull(row['P2']):
@@ -104,21 +109,20 @@ def run_simulation(row, solvent, jobname):
     
 
 def main():
-    # Define arguments
+    # Get arguments
     args = arg_parser()
     
-    # define initial path
+    # define current path
     path = os.getcwd()
     
-    # New folder 
-    new_folder = os.path.join(path, args.jobname)
     # Create new folder for job
+    new_folder = os.path.join(path, args.jobname)
     if not os.path.exists(new_folder):
         os.mkdir(new_folder)
     
     # Customize autodE
     # Define number of cores to use
-    # 16 seem to be the max allowed for the available RAM
+    # 14 seems to be the max allowed for the available RAM
     ade.Config.n_cores = args.ncores 
     # Add diffuse functions because of anions
     # (ma-def2-SVP is recommendation from autodE troubleshooting)
@@ -136,25 +140,23 @@ def main():
     # Change dir
     os.chdir(new_folder)
     
-    # Iterate over dataframe to run reaction for each compound
+    # Iterate over dataframe to run reaction profile for each compound
     for _, row in df.iterrows():
         name = row["name"]
         print(f'Running reaction for {name}...')
-        
-        jobname=f'{args.jobname}_{name}'
         # run_simulation(row)
+        jobname=f'{args.jobname}_{name}'
         thread = threading.Thread(target=run_simulation(row, 
                                                         args.solvent, 
                                                         jobname))
         thread.start()
-        
+        # Check existence of output
         resulting_file = os.path.join(new_folder, 
                                       jobname + '_reaction_profile.pdf')
         while not os.path.exists(resulting_file):
             pass
         
         print(f'Simulation for {name} finished.\n')
-        
         
 
 if __name__ == '__main__':
