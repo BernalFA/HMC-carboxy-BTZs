@@ -47,7 +47,7 @@ def arg_parser() -> argparse.Namespace:
     parser.add_argument('-solv',
                         dest='solvent', 
                         default='water',
-                        help='Solvent (default: water)')
+                        help='Solvent name (default: water)')
     parser.add_argument('-temp',
                         dest='temp',
                         default=298.15,
@@ -55,7 +55,7 @@ def arg_parser() -> argparse.Namespace:
     parser.add_argument('-ncores',
                         dest='ncores', 
                         default=14,
-                        help='Number of cores (default: 14)')
+                        help='Number of CPU cores (default: 14)')
     parser.add_argument('-j',
                         dest='jobname',
                         help='jobname')
