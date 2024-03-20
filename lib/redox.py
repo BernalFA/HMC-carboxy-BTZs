@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Class to run Standard Redox potential calculations using 
 ORCA and autodE.
-Based on Reaction class from autodE. 
+Based on the `Reaction` class from autodE. 
 
 Author: Dr. Freddy Bernal
 
@@ -19,7 +17,6 @@ from autode.exceptions import CouldNotGetProperty
 from datetime import date
 import tqdm
 
-from setup_logger import logger
 
 BAR_FORMAT = '{l_bar}{bar:20}{r_bar}'
 
@@ -47,8 +44,8 @@ class Redox:
         @work_in(self.name)
         def calculate(redox):
             desc = f"Calculation {self.name} using {type(self).__name__}.\n"
-            logger.info(desc + f"{len(self.oxidized)} structures.")
-            logger.info("Calculation started.")
+            print(desc + f"{len(self.oxidized)} structures.")
+            print("Calculation started.")
             redox.find_lowest_energy_conformers()
             redox.optimise_structures()
             redox.calculate_thermochemical_cont()
@@ -79,13 +76,13 @@ class Redox:
 
 
     def find_lowest_energy_conformers(self) -> None:
-        logger.info("Conformational search started.")
+        print("Conformational search started.")
         h_method = get_hmethod() if Config.hmethod_conformers else None
         for mol in tqdm.tqdm(self.oxidized, 
                              desc="ConfSearch",
                              bar_format=BAR_FORMAT):
             mol.find_lowest_energy_conformer(hmethod=h_method)
-        logger.info("Conformational search completed.")
+        print("Conformational search completed.")
 
         return None
     
@@ -95,7 +92,7 @@ class Redox:
         """Perform a geometry optimisation on all the reactants and products
         using the method"""
 
-        logger.info("Optimizations started.")
+        print("Optimizations started.")
         h_method = get_hmethod()
 
         for mol in tqdm.tqdm(self.oxidized, 
@@ -113,7 +110,7 @@ class Redox:
                              bar_format=BAR_FORMAT):
             mol.optimise(h_method)
 
-        logger.info("Optimizations completed.")
+        print("Optimizations completed.")
 
         return None
 
@@ -123,13 +120,13 @@ class Redox:
         
         if not (free_energy or enthalpy):
             return None
-        logger.info("Thermochemical contributions started.")
+        print("Thermochemical contributions started.")
         for mol in tqdm.tqdm(self.oxidized + self.reduced, 
                              desc="g_count",
                              bar_format=BAR_FORMAT):
             mol.calc_thermo(temp=self.temp)
             
-        logger.info("Thermochemical contributions completed.")
+        print("Thermochemical contributions completed.")
 
         return None
 
@@ -146,14 +143,14 @@ class Redox:
                 elif 'red' in mol_solv.name:
                     self.reduced.append(mol_solv)
         
-        logger.info(f"Structures solvated ({self.solvent}).")
+        print(f"Structures solvated ({self.solvent}).")
 
         return None
     
 
     @work_in("single_points")
     def calculate_single_points(self) -> None:
-        logger.info("Single point calculations started.")
+        print("Single point calculations started.")
         h_method = get_hmethod()
         for mol in tqdm.tqdm(self.oxidized + self.reduced, 
                              desc="SP",
@@ -163,14 +160,14 @@ class Redox:
             except CouldNotGetProperty:
                 print(f"Could not get energy for {mol.name}")
             
-        logger.info("Single point calculations completed.")
+        print("Single point calculations completed.")
 
         return None
         
     
     @work_in("output")
     def print_output(self):
-        logger.info("Printing results.")
+        print("Printing results.")
         from autode.log.methods import methods
         
         with open("methods.txt", "w") as out_file:
