@@ -128,6 +128,7 @@ if __name__ == '__main__':
     # (ma-def2-SVP is recommendation from autodE troubleshooting)
     ade.Config.ORCA.keywords.set_opt_basis_set(args.basis_set_opt)
     ade.Config.ORCA.keywords.sp.basis_set = args.basis_set_sp
+    ade.Config.ORCA.keywords.opt.max_opt_cycles = 250    
     # Modify input for sp to overcome SCF convergence problems for 
     # radical anions according to ORCA directions
     ade.Config.ORCA.keywords.sp.append(
