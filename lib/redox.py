@@ -15,10 +15,6 @@ from autode.species.molecule import Molecule
 from autode.solvent.solvents import get_solvent
 from autode.exceptions import CouldNotGetProperty
 from datetime import date
-import tqdm
-
-
-BAR_FORMAT = '{l_bar}{bar:20}{r_bar}'
 
 
 class Redox:
@@ -94,9 +90,7 @@ class Redox:
         
         print("Conformational search started.")
         h_method = get_hmethod() if Config.hmethod_conformers else None
-        for mol in tqdm.tqdm(self.oxidized, 
-                             desc="ConfSearch",
-                             bar_format=BAR_FORMAT):
+        for mol in self.oxidized:
             mol.find_lowest_energy_conformer(hmethod=h_method)
         print("Conformational search completed.")
 
@@ -111,9 +105,7 @@ class Redox:
         print("Optimizations started.")
         h_method = get_hmethod()
 
-        for mol in tqdm.tqdm(self.oxidized, 
-                             desc="OptOx",
-                             bar_format=BAR_FORMAT):
+        for mol in self.oxidized:
             mol.optimise(h_method)
             red = mol.copy()
             red.charge = -1 
@@ -121,9 +113,7 @@ class Redox:
             red.name = red.name.replace("ox", "red")
             self.reduced.append(red)
 
-        for mol in tqdm.tqdm(self.reduced, 
-                             desc="OptRed",
-                             bar_format=BAR_FORMAT):
+        for mol in self.reduced:
             mol.optimise(h_method)
 
         print("Optimizations completed.")
@@ -147,9 +137,7 @@ class Redox:
         if not (free_energy or enthalpy):
             return None
         print("Thermochemical contributions started.")
-        for mol in tqdm.tqdm(self.oxidized + self.reduced, 
-                             desc="g_count",
-                             bar_format=BAR_FORMAT):
+        for mol in self.oxidized + self.reduced:
             mol.calc_thermo(temp=self.temp)
             
         print("Thermochemical contributions completed.")
@@ -183,9 +171,7 @@ class Redox:
 
         print("Single point calculations started.")
         h_method = get_hmethod()
-        for mol in tqdm.tqdm(self.oxidized + self.reduced, 
-                             desc="SP",
-                             bar_format=BAR_FORMAT):
+        for mol in self.oxidized + self.reduced:
             try:
                 mol.single_point(h_method)
             except CouldNotGetProperty:
