@@ -56,10 +56,14 @@ class Redox:
             desc = f"Calculation {self.name} using {type(self).__name__}.\n"
             print(desc + f"{len(self.oxidized)} structures.")
             print("Calculation started.")
+            print("CONFORMATIONAL SEARCH")
             redox.find_lowest_energy_conformers()
+            print("GEOMETRY OPTIMIZATION")
             redox.optimise_structures()
+            print("THERMOCHEMICAL CONTRIBUTIONS")
             redox.calculate_thermochemical_cont()
             redox._solvate()    
+            print("SINGLE POINT CALCULATIONS")
             redox.calculate_single_points()
             redox.print_output()
             return None
@@ -91,6 +95,7 @@ class Redox:
         print("Conformational search started.")
         h_method = get_hmethod() if Config.hmethod_conformers else None
         for mol in self.oxidized:
+            print("  " + mol.name)
             mol.find_lowest_energy_conformer(hmethod=h_method)
         print("Conformational search completed.")
 
@@ -106,6 +111,7 @@ class Redox:
         h_method = get_hmethod()
 
         for mol in self.oxidized:
+            print("  " + mol.name)
             mol.optimise(h_method)
             red = mol.copy()
             red.charge = -1 
@@ -114,6 +120,7 @@ class Redox:
             self.reduced.append(red)
 
         for mol in self.reduced:
+            print("  " + mol.name)
             mol.optimise(h_method)
 
         print("Optimizations completed.")
@@ -138,6 +145,7 @@ class Redox:
             return None
         print("Thermochemical contributions started.")
         for mol in self.oxidized + self.reduced:
+            print("  " + mol.name)
             mol.calc_thermo(temp=self.temp)
             
         print("Thermochemical contributions completed.")
@@ -173,6 +181,7 @@ class Redox:
         h_method = get_hmethod()
         for mol in self.oxidized + self.reduced:
             try:
+                print("  " + mol.name)
                 mol.single_point(h_method)
             except CouldNotGetProperty:
                 print(f"Could not get energy for {mol.name}")
@@ -226,6 +235,7 @@ class Redox:
                 frequencies.append(mol.imaginary_frequencies)
             
         with open("imaginary_frequencies.csv", "w") as imfreq:
-                imfreq.writelines([f"{n}: {freq}" for n, freq in zip(names, frequencies)])
+            for n, f in zip(names, frequencies):
+                imfreq.write(f"{n}: {f}\n")
     
         return None
