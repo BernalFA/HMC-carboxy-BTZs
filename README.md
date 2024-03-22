@@ -20,7 +20,7 @@ To run reaction energy profiles or redox potential calculations using our script
 
 ## Details
 
-* `calculate_redox_potential.py` runs optimization and single point energy calculations for the lowest energy conformer of a series of compounds, starting from SMILES strings. Calculations for the neutral (given form = oxidized form) and the corresponding radical anion (reduced form) are performed using the automation and wrapper functionalities of `autodE`. Calculation of the reduction potential is performed with the `calculate_redox_potential` function in `utils.py`, following a classical thermodynamic cycle approach as shown below.
+* `redox_potential.py` runs optimization and single point energy calculations for the lowest energy conformer of a series of compounds, starting from SMILES strings. Calculations for the neutral (given form = oxidized form) and the corresponding radical anion (reduced form) are performed using the automation and wrapper functionalities of `autodE`. Calculation of the reduction potential is performed with the `calculate_redox_potential` function in `utils.py`, following a classical thermodynamic cycle approach as shown below.
 
   <p align="center">
   <img width="460" height="300" src="img/thermodynamic_cycle_redox.svg">
@@ -28,19 +28,19 @@ To run reaction energy profiles or redox potential calculations using our script
 
   For further information on the script, see help:
   ```
-  $ python calculate_redox_potential.py -h
+  $ python redox_potential.py -h
   ```
 
-* `calculate_reactivity.py` allows to sequentially calculate reaction energy profiles at DFT level for a set of reactions of interest. It creates a new folder to store the results individually obtained by `autodE`. Use help to see the available options:
+* `reactivity.py` allows to sequentially calculate reaction energy profiles at DFT level for a set of reactions of interest. It creates a new folder to store the results individually obtained by `autodE`. Use help to see the available options:
   ```
-  $ python calculate_reactivity.py -h
+  $ python reactivity.py -h
   ```
 
-* `reaction_profile_summary.py` helps retrieving data from a series of calculations in `autodE` (as those obtained from `calculate_reactivity.py`). All the evaluated folders must be on the current directory. It generates a CSV file containing the respective reaction energetics (&Delta;E, &Delta;E‡, &Delta;G, &Delta;G‡). 
+* `reaction_profile_summary.py` helps retrieving data from a series of calculations in `autodE` (as those obtained from `reactivity.py`). All the evaluated folders must be on the current directory. It generates a CSV file containing the respective reaction energetics (&Delta;E, &Delta;E‡, &Delta;G, &Delta;G‡). 
 
 * The `notebooks`, as their names indicate, contain some data preparation and analysis.
 
-* `inputs` contains a CSV and a SMI files used as input for `calculate_reactivity.py` and `calculate_redox_potential.py`, respectively.
+* `inputs` contains a CSV and a SMI files used as input for `reactivity.py` and `redox_potential.py`, respectively.
 
 * `data` contains separate files with calculated and experimental properties for each compound under study. It also includes the atom numbers for the nitro-BTZ core for each structure according to the respective Jaguar outputs.
 
@@ -52,7 +52,7 @@ To run reaction energy profiles or redox potential calculations using our script
 
     * `redox.py` presents a Python class based on the `Reaction` class of `autodE` to perform automatic energy calculations at DFT level for neutral and radical anion forms of given species, for later redox potential calculation. 
 
-    * `utils.py` is a module containing functions to calculate reaction energetics from `autodE` or `calculate_reactivity.py` outputs, and redox potential from `calculate_redox_potential.py` outputs. Functions to calculate statitical correlations and combine calculated properties with experimental data are also included.
+    * `utils.py` is a module containing functions to calculate reaction energetics from `autodE` or `reactivity.py` outputs, and redox potential from `redox_potential.py` outputs. Functions to calculate statitical correlations and combine calculated properties with experimental data are also included.
 
 
 &nbsp;
