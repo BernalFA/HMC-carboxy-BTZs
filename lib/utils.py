@@ -95,6 +95,207 @@ def correlation_statistics(df: pd.DataFrame,
                 print(f'  {lab:20}: {test.correlation:.2} ({test.pvalue:.2})')
 
 
+
+class PLContacts:
+    """Retrieve protein-ligand contacts obtained by the Simulation Interaction
+    Diagram (SID) from Schrödinger after MD run with Desmond for a specified
+    group of results/samples. It can compare the results to keep only important 
+    residues to all the simulations/samples.
+    """    
+    def __init__(self, path: str, start: int, trj_len: int, rep: int=1):
+        """
+        Args:
+            path (str): path to folder containing all the results from SID.
+            start (int): starting frame number to consider in analysis.
+            trj_len (int): total number of frames in trajectory.
+            rep (int, optional): Number of replicates per sample. Defaults to 1.
+        """        
+        self.path = path
+        self.start = start
+        self.trj_len = trj_len
+        self.rep = rep
+    
+    
+    def get_common_contacts(self, folders: list) -> dict:
+        """Retrieve contacts from all the provided folders and return only those
+        common to all the samples. Only contacts with at least 30% persistence 
+        for one sample are kept.
+
+        Args:
+            folders (list): folder names in the provided path to inspect.
+
+        Returns:
+            dict: common contacts stored as pandas dataframes.
+        """        
+        self.get_contacts(folders)
+        self._get_common_residues()
+        comparable_data = self._make_data_comparable()
+        return comparable_data
+    
+
+    def get_contacts(self, folders: list):
+        """Retrieve contacts from all the provided folders. The results are 
+        stored as dict with pd.DataFrames in the attribute total_contacts
+
+        Args:
+            folders (list): folder names in the provided path to inspect.
+        """        
+        self.total_contacts = {}
+        for folder in folders:
+            contacts = self._retrieve_contacts(folder)
+            contacts_red = contacts[contacts['Frame#'] > self.start]
+            fractions = self._calculate_fractions(contacts_red)
+            fractions_matrix = self._transform_matrix(fractions)
+            self.total_contacts[folder] = fractions_matrix
+    
+    
+    def _retrieve_contacts(self, folder: list) -> pd.DataFrame:
+        """Combine the PL contacts information from SID (several .dat files)
+        into one dataframe.
+
+        Args:
+            folder (list): folder names to retrieve data from.
+
+        Returns:
+            pd.DataFrame: PL contacts.
+        """        
+        files = ['PL-Contacts_HBond.dat', 
+                 'PL-Contacts_Hydrophobic.dat', 
+                 'PL-Contacts_Ionic.dat', 
+                 'PL-Contacts_WaterBridge.dat',
+                 'PL-Contacts_Pi-Cation.dat', 
+                 'PL-Contacts_Pi-Pi.dat']
+        
+        cols = ['Frame#', 'Residue#', 'ResName']
+        contacts = pd.DataFrame(columns=cols)
+        for file in files:
+            # Define path to file
+            f = os.path.join(self.path, folder, file)
+            # Read file with Pandas
+            df = pd.read_fwf(f)
+            df = df[cols].copy()
+            itype = file.split('_')[1].split('.')[0]
+            if itype == 'Pi-Cation':
+                itype = 'Ionic'
+            elif itype == 'Pi-Pi':
+                itype = 'Hydrophobic'
+            df['type'] = itype
+            contacts = pd.concat((contacts, df), axis=0)
+
+        contacts['Res'] = contacts['ResName'] + '_' + contacts['Residue#'].map(str)    
+        return contacts
+
+    
+    def _calculate_fractions(self, contacts_red: pd.DataFrame) -> pd.DataFrame:
+        """Convert the number of appearances for each contact into interaction
+        fractions.
+
+        Args:
+            contacts_red (pd.DataFrame): contacts extracted from SID.
+
+        Returns:
+            pd.DataFrame: interaction fractions.
+        """        
+        total_frames = self.trj_len - self.start
+        fractions = pd.DataFrame(columns=['Residue', 'Type', 'Fraction'])
+        for it in contacts_red['type'].unique():
+            dt = contacts_red[contacts_red['type'] == it]
+            for res in contacts_red['Res'].unique():
+                dr = dt[dt['Res'] == res]
+                fractions.loc[len(fractions)] = [res, it, len(dr) / total_frames]
+        return fractions
+    
+    
+    def _transform_matrix(self, fractions: pd.DataFrame) -> pd.DataFrame:
+        """Convert original interaction fractions dataframe for the ease of 
+        management.
+
+        Args:
+            fractions (pd.DataFrame): interaction fractions.
+
+        Returns:
+            pd.DataFrame: interaction fractions rearranged.
+        """        
+        cols = ['HBond', 'Hydrophobic', 'Ionic', 'WaterBridge']
+
+        matrix_frac = fractions.pivot_table(index='Residue', 
+                                            columns='Type',
+                                            values='Fraction').reset_index()
+        for col in cols:
+            if col not in matrix_frac.columns:
+                matrix_frac[col] = np.zeros(len(matrix_frac))
+                
+        matrix_frac[['Res', 'ResNum']] = matrix_frac['Residue'].str.split('_', expand=True)
+        matrix_frac.sort_values(by='ResNum', inplace=True)
+        matrix_frac['Residue'] = matrix_frac['Res'] + matrix_frac['ResNum'].map(str)
+        
+        return matrix_frac        
+
+    
+    def _make_data_comparable(self) -> dict:
+        """Filter interaction fractions on all samples by common residues. If
+        a residue does not show interaction with the ligand, a zeros row is added
+        instead.
+
+        Returns:
+            dict: interaction fractions for all samples with common residues.
+        """        
+        cols = ['HBond', 'Hydrophobic', 'Ionic', 'WaterBridge']
+
+        comparable_data = {}
+        for key in self.total_contacts.keys():
+            d = self.total_contacts[key].copy()
+            comparable = pd.DataFrame(columns=['Residue'] + cols + ['Res', 'ResNum'])
+            for res in self.common_residues:
+                if res in d.Residue.tolist():
+                    tmp = d[d.Residue == res]
+                    d_red = [res]
+                    for col in cols:
+                        if col in tmp.columns:
+                            d_red.append(tmp[col].values[0])
+                        else:
+                            d_red.append(0)
+                    d_red.append(tmp['Res'].values[0])
+                    d_red.append(int(tmp['ResNum'].values[0]))
+                else:
+                    d_red = [res, 0, 0, 0, 0, 
+                             res[:3], int(res[3:])]
+
+                comparable.loc[len(comparable)] = d_red
+
+            comparable.sort_values(by='ResNum', inplace=True)
+            comparable_data[key] = comparable
+
+        return comparable_data
+    
+    
+    def _get_common_residues(self, threshold: float=0.3) -> list:
+        """Create a list of common residues among samples. To be included, at 
+        least one sample must have an interaction fraction with that residue 
+        equal to the threshold.
+
+        Args:
+            threshold (float, optional): minimum interaction fraction to be 
+            considered for analysis. Defaults to 0.3.
+
+        Returns:
+            list: residue names common to all samples.
+        """        
+        residues = []
+        for val in self.total_contacts.values():
+            for res in val.Residue.unique():
+                mask1 = (res not in residues)
+                mask2 = (val[val.Residue == res].sum(
+                    axis=1, 
+                    numeric_only=True
+                ).values >= threshold)
+                mask3 = (res != 'CYS394')
+                if mask1 & mask2 & mask3:
+                    residues.append(res)
+
+        self.common_residues = residues
+
+
 ############################
 # autodE related functions #
 ############################
