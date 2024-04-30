@@ -8,7 +8,7 @@ This repository contains the necessary code and raw data to reproduce the analys
 
 ## Requirements
 
-For reproducibility purposes, it is recommended to run the code in a dedicated `conda` environment. For data analysis, only `Python` libraries commonly used in Cheminformatics are required, as indicated in the `environment.yml` file. To set up the environment first install a `conda` distribution (e.g. `miniconda`; follow instructions in the [official Anaconda wesbsite](https://docs.anaconda.com/free/miniconda/miniconda-install/)). Afterward, create the environment as follows:
+For reproducibility purposes, it is recommended to run the code in a dedicated `conda` environment. For data analysis, only `Python` libraries commonly used in Chemoinformatics are required, as indicated in the `environment.yml` file. To set up the environment first install a `conda` distribution (e.g. `miniconda`; follow instructions in the [official Anaconda website](https://docs.anaconda.com/free/miniconda/miniconda-install/)). Afterward, create the environment as follows:
 
 ```
 $ conda env create -f environment.yml
@@ -38,21 +38,21 @@ To run reaction energy profiles or redox potential calculations using our script
 
 * `reaction_profile_summary.py` helps retrieving data from a series of calculations in `autodE` (as those obtained from `reactivity.py`). All the evaluated folders must be on the current directory. It generates a CSV file containing the respective reaction energetics (&Delta;E, &Delta;E‡, &Delta;G, &Delta;G‡). 
 
-* The `notebooks`, as their names indicate, contain some data preparation and analysis.
+* The `notebooks`, as their names indicate, contain some data preparation and analysis to obtain the figures shown in the paper.
 
-* `inputs` contains a CSV and a SMI files used as input for `reactivity.py` and `redox_potential.py`, respectively.
+* `inputs` contains a CSV and a SMI file used as input for `reactivity.py` and `redox_potential.py`, respectively.
 
 * `data` contains separate files with calculated and experimental properties for each compound under study. It also includes the atom numbers for the nitro-BTZ core for each structure according to the respective Jaguar outputs.
 
 * `results` contains an Excel file, which presents calculated data combined with the experimentally measured properties for the ease of analysis and visualization.
 
-* `lib` contains custom Python modules necessary for the use of the above-mentioned scripts. 
+* `lib` contains custom Python modules necessary for the use of the above-mentioned scripts and notebooks. 
 
     * `descriptors.py` presents a Python class to preprocess QM descriptors obtained from Jaguar calculations after retrieval with the Schrödinger's `qm_descriptors.py` script.
 
-    * `redox.py` presents a Python class based on the `Reaction` class of `autodE` to perform automatic energy calculations at DFT level for neutral and radical anion forms of given species, for later redox potential calculation. 
+    * `redox.py` presents a Python class based on the `Reaction` class of `autodE` to perform automatic energy calculations at DFT level for neutral and radical anion forms of given species, for subsequent redox potential calculation. 
 
-    * `utils.py` is a module containing functions to calculate reaction energetics from `autodE` or `reactivity.py` outputs, and redox potential from `redox_potential.py` outputs. Functions to calculate statitical correlations and combine calculated properties with experimental data are also included.
+    * `utils.py` is a module containing functions to calculate reaction energetics from `autodE` or `reactivity.py` outputs, and redox potential from `redox_potential.py` outputs. Functions to calculate statitical correlations, combine calculated properties with experimental data, and process protein-ligand interactions from Schrödinger's SID are also included.
 
 
 &nbsp;
