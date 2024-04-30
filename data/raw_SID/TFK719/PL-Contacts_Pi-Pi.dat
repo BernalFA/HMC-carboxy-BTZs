@@ -1,0 +1,5 @@
+  # Frame#   Residue#      Chain    ResName  LigandFragment        Distance       Type
+        11        322          A        HIS        L-FRAG_0           5.190        e2f
+        13        322          A        HIS        L-FRAG_0           4.460        e2f
+        14        322          A        HIS        L-FRAG_0           4.760        e2f
+        24        322          A        HIS        L-FRAG_0           5.240        e2f
