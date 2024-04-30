@@ -1,0 +1,21 @@
+  # Frame#   Residue#      Chain    ResName   AtomName  LigandFragment      LigandAtom   Distance
+        40        141          A        LYS         NZ        L-FRAG_0              O2      4.890 
+        46        141          A        LYS         NZ        L-FRAG_0              O2      4.920 
+        54        374          A        LYS         NZ        L-FRAG_0              O2      4.250 
+        61        141          A        LYS         NZ        L-FRAG_0              O2      4.980 
+        66        141          A        LYS         NZ        L-FRAG_0              O2      4.900 
+       113        141          A        LYS         NZ        L-FRAG_0              O2      4.950 
+       128        141          A        LYS         NZ        L-FRAG_0              O2      4.850 
+       129        141          A        LYS         NZ        L-FRAG_0              O2      4.730 
+       130        141          A        LYS         NZ        L-FRAG_0              O2      4.430 
+       132        141          A        LYS         NZ        L-FRAG_0              O2      4.860 
+       135        141          A        LYS         NZ        L-FRAG_0              O2      4.840 
+       146        141          A        LYS         NZ        L-FRAG_0              O2      4.620 
+       153        141          A        LYS         NZ        L-FRAG_0              O2      4.930 
+       170        141          A        LYS         NZ        L-FRAG_0              O2      4.810 
+       374        141          A        LYS         NZ        L-FRAG_0              O2      4.780 
+       385        141          A        LYS         NZ        L-FRAG_0              O2      4.800 
+       405        141          A        LYS         NZ        L-FRAG_0              O2      4.350 
+       418        141          A        LYS         NZ        L-FRAG_0              O2      4.890 
+       430        141          A        LYS         NZ        L-FRAG_0              O2      4.950 
+       494        141          A        LYS         NZ        L-FRAG_0              O2      4.890 
