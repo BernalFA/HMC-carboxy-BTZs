@@ -23,7 +23,7 @@ To run reaction energy profiles or redox potential calculations using our script
 * `redox_potential.py` runs optimization and single point energy calculations for the lowest energy conformer of a series of compounds, starting from SMILES strings. Calculations for the neutral (given form = oxidized form) and the corresponding radical anion (reduced form) are performed using the automation and wrapper functionalities of `autodE`. Calculation of the reduction potential is performed with the `calculate_redox_potential` function in `utils.py`, following a classical thermodynamic cycle approach as shown below.
 
   <p align="center">
-  <img width="460" height="300" src="img/thermodynamic_cycle_redox.svg">
+  <img width="400" height="300" src="img/thermodynamic_cycle_redox.png">
   </p>
 
   For further information on the script, see help:
