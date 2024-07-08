@@ -2,7 +2,7 @@
 
 &nbsp;
 
-This repository contains the necessary code and raw data to reproduce the analysis described in our manuscript [Keiff et al]().
+This repository contains the necessary code and raw data to reproduce the analysis described in our manuscript [Keiff, Bernal, et al. Commun. Chem. 2024](https://doi.org/10.1038/s42004-024-01235-x).
 
 &nbsp;
 
@@ -58,18 +58,19 @@ To run reaction energy profiles or redox potential calculations using our script
 &nbsp;
 
 ## Citation
+If you use this code or parts of the content in this repository, please cite it as:
+
 ```
-@article{,
-  doi = {},
-  url = {},
-  year = {},
-  month = ,
-  publisher = {},
-  volume = {},
-  number = {,
-  pages = {},
-  author = {},
-  title = {},
-  journal = {}
+@article{Keiff_Bernal_2024,
+  doi = {10.1038/s42004-024-01235-x},
+  url = {https://www.nature.com/articles/s42004-024-01235-x},
+  year = {2024},
+  month = {June},
+  publisher = {Nature},
+  volume = {7},
+  pages = {153},
+  author = {Keiff, François; Bernal, Freddy A.; Joch, Melanie; Jacques dit Lapierre, Thibault; Li, Yan; Liebing, Phil; Dahse, Hans-Martin; Vilotijevic, Ivan; Kloss, Florian},
+  title = {Modulation of the Meisenheimer complex metabolism of nitro-benzothiazinones by targeted C-6 substitution},
+  journal = {Communications Chemistry}
 }
 ```
